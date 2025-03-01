@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meeting Scheduler</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; padding: 20px; }
+        .container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
+        input, button { width: 100%; padding: 10px; margin: 5px 0; border-radius: 5px; }
+        button { background: #28a745; color: white; border: none; cursor: pointer; }
+        button:hover { background: #218838; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Meeting Scheduler</h2>
+        <p>Enter number of participants:</p>
+        <input id="numUsers" type="number" min="1" placeholder="Enter number of users">
+        <button onclick="generateInputs()">Proceed</button>
+
+        <div id="timeInputs"></div>
+        <button id="findTimeBtn" onclick="findCommonTime()" style="display:none;">Find Common Time</button>
+        <p id="result"></p>
+    </div>
+
+    <script>
+        function generateInputs() {
+            let numUsers = document.getElementById('numUsers').value;
+            let container = document.getElementById('timeInputs');
+            container.innerHTML = ""; 
+            
+            for (let i = 1; i <= numUsers; i++) {
+                container.innerHTML += `<input class="timeSlot" placeholder="Person ${i} Availability (HHMM-HHMM)">`;
+            }
+
+            document.getElementById('findTimeBtn').style.display = "block";
+        }
+
+        function findCommonTime() {
+            let times = Array.from(document.getElementsByClassName('timeSlot'))
+                .map(input => input.value.split('-').map(t => fixTime(t)));
+
+            let start = Math.max(...times.map(t => t[0])), end = Math.min(...times.map(t => t[1]));
+            document.getElementById('result').innerText = start < end ? 
+                `Common Time: ${formatTime(start)} - ${formatTime(end)}` : "No common time.";
+        }
+
+        function fixTime(timeStr) {
+            let num = parseInt(timeStr.padStart(4, '0')); 
+            let hours = Math.floor(num / 100);
+            let minutes = num % 100;
+
+            if (minutes >= 60) { // Fix minutes if greater than 59
+                hours += Math.floor(minutes / 60);
+                minutes = minutes % 60;
+            }
+
+            if (hours >= 24) { // Prevent hours from exceeding 23
+                hours = 0;
+                minutes = 0;
+            }
+
+            return (hours * 100) + minutes; // Convert back to HHMM format
+        }
+
+        function formatTime(t) {
+            return `${String(t).padStart(4, '0').slice(0,2)}:${String(t).padStart(4, '0').slice(2)}`;
+        }
+    </script>
+</body>
+</html>
